@@ -1,5 +1,6 @@
 .firebase/
 firebase_options.dart
+android/app/google-services.json
 
 .idea
 
