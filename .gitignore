@@ -1,7 +1,5 @@
 .firebase/
-.env
-.env.*
-!.env.template
+firebase_options.dart
 
 .idea
 

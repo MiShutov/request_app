@@ -68,33 +68,106 @@ class RequestsListScreen extends StatelessWidget {
 
   // Карточка заявки
   Widget _buildRequestCard(BuildContext context, RequestModel request) {
+    final urgencyColor = RequestModel.getUrgencyColor(request.urgency);
+    
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      child: ListTile(
-        title: Text(request.requestText),
-        subtitle: Text(
-          '${request.street}, д.${request.house}, кв.${request.apartment}',
-        ),
-        trailing: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      child: ExpansionTile(
+        leading: Container(
+          width: 8,
+          height: 80,
           decoration: BoxDecoration(
-            color: request.status == 'принята' ? Colors.orange : Colors.green,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            request.status,
-            style: const TextStyle(color: Colors.white),
+            color: urgencyColor,
+            borderRadius: BorderRadius.circular(4),
           ),
         ),
-        onTap: () {
-          // Переход к деталям заявки
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => RequestDetailScreen(request: request),
+        title: Text(
+          request.requestText,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 4),
+            Text(
+              '${request.street}, д.${request.house}, кв.${request.apartment}',
+              style: const TextStyle(fontSize: 13),
             ),
-          );
-        },
+            if (request.phoneNumber.isNotEmpty)
+              Text(
+                request.phoneNumber,
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+            if (request.category.isNotEmpty)
+              Text(
+                request.category,
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+          ],
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: request.status == 'принята' ? Colors.orange : Colors.green,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                request.status,
+                style: const TextStyle(color: Colors.white, fontSize: 12),
+              ),
+            ),
+            const Icon(Icons.chevron_right),
+          ],
+        ),
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildInfoRow('Получено', RequestModel.formatDateTime(request.dateReceived)),
+                if (request.dateCompleted != null)
+                  _buildInfoRow('Выполнено', RequestModel.formatDateTime(request.dateCompleted)),
+                _buildInfoRow('Срочность', request.urgency),
+                if (request.comment.isNotEmpty)
+                  _buildInfoRow('Комментарий', request.comment),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => RequestDetailScreen(request: request),
+                        ),
+                      );
+                    },
+                    child: const Text('Подробнее'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        children: [
+          Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(width: 8),
+          Expanded(child: Text(value)),
+        ],
       ),
     );
   }
